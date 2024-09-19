@@ -65,4 +65,20 @@ func TestPostHandler(t *testing.T) {
 		expectedBody := `{"message":"Hello from test"}`
 		assert.JSONEq(t, expectedBody, w.Body.String())
 	})
+
+	t.Run("Negative case - EOF Error", func(t *testing.T) {
+		requestBody := ""
+		requestBodyBytes := []byte(requestBody)
+
+		req, _ := http.NewRequest("POST", "/", bytes.NewBuffer(requestBodyBytes))
+		req.Header.Set("Content-Type", "application/json")
+
+		w := httptest.NewRecorder()
+
+		r.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		assert.Contains(t, w.Body.String(), "{\"error\":\"EOF\"}")
+	})
 }
